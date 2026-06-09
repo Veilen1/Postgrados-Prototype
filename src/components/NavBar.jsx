@@ -19,7 +19,8 @@ export default function NavBar() {
         <Typography variant="h6" component={Link} to="/" sx={{ color: 'inherit', textDecoration: 'none', flexGrow: 1 }}>
           Posgrado - Demo
         </Typography>
-        <Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          {user && <Typography variant="body2" sx={{ mr: 1 }}>Conectado: {user.name} ({user.role})</Typography>}
           <MuiButton color="inherit" component={Link} to="/preinscripcion">Preinscripción</MuiButton>
           {!user && <MuiButton color="inherit" component={Link} to="/login">Login</MuiButton>}
           {user && user.role === 'conduccion' && <MuiButton color="inherit" component={Link} to="/admin">Panel</MuiButton>}

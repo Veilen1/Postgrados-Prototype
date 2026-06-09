@@ -20,7 +20,11 @@ export default function TeacherSheet() {
     if (!Array.isArray(copy.academicProfile.seminars)) copy.academicProfile.seminars = []
     if (copy.academicProfile.seminars.length === 0) {
       // create a default seminar record to allow marking attendance
-      copy.academicProfile.seminars = [{ id: `sem-${copy.cohort || 'x'}`, name: 'Seminario (auto)', sessions: 0, sessionDates: [], attendanceRecords: [], finalGrade: null, approved: false }]
+      // provide a reasonable default of 10 weekly sessions so new aspirantes
+      // have visible session dates and attendance checkboxes
+      const sessions = 10
+      const sessionDates = Array.from({ length: sessions }).map((_, idx) => new Date(Date.now() - (sessions - 1 - idx) * 7 * 24 * 3600 * 1000).toISOString())
+      copy.academicProfile.seminars = [{ id: `sem-${copy.cohort || 'x'}`, name: 'Seminario (auto)', sessions, sessionDates, attendanceRecords: Array.from({ length: sessions }).map(() => false), finalGrade: null, approved: false }]
     } else {
       // ensure seminar has required arrays
       copy.academicProfile.seminars = copy.academicProfile.seminars.map(s => ({

@@ -435,6 +435,30 @@ export function sendRemindersToDocentes() {
 
 export function addAspirante(obj) {
   const arr = getAspirantes()
+  // Ensure newly created aspirantes have a minimal academicProfile so
+  // teacher/student views can show sessions and attendance checkboxes.
+  if (!obj.academicProfile) {
+    const sessions = 10
+    const sessionDates = Array.from({ length: sessions }).map((_, idx) => new Date(Date.now() - (sessions - 1 - idx) * 7 * 24 * 3600 * 1000).toISOString())
+    obj.academicProfile = {
+      cohort: obj.cohort || null,
+      seminars: [
+        {
+          id: `sem-${obj.cohort || 'x'}`,
+          name: 'Seminario (preinscripción)',
+          sessions,
+          sessionDates,
+          attendanceRecords: Array.from({ length: sessions }).map(() => false),
+          finalGrade: null,
+          actaDate: null,
+          deadline: null,
+          approved: false
+        }
+      ],
+      tfi: { status: 'pendiente' }
+    }
+  }
+
   obj.id = uid('a')
   obj.createdAt = new Date().toISOString()
   obj.legajoStatus = computeLegajoStatus(obj)

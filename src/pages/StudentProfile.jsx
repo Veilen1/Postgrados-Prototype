@@ -50,7 +50,11 @@ export default function StudentProfile() {
   const color = semaforoColor(overall)
 
   const now = new Date()
-  const soonDeadlines = a.academicProfile.seminars.flatMap(s => s.deadline ? [new Date(s.deadline)] : []).filter(d => d > now && (d - now) / (1000 * 3600 * 24) <= 30)
+  // Defensive access: aspirante may not have academicProfile or seminars defined
+  const seminars = (a.academicProfile && Array.isArray(a.academicProfile.seminars)) ? a.academicProfile.seminars : []
+  const tutorias = (a.academicProfile && Array.isArray(a.academicProfile.tutorias)) ? a.academicProfile.tutorias : []
+  const tfi = (a.academicProfile && a.academicProfile.tfi) ? a.academicProfile.tfi : null
+  const soonDeadlines = seminars.flatMap(s => s.deadline ? [new Date(s.deadline)] : []).filter(d => d > now && (d - now) / (1000 * 3600 * 24) <= 30)
 
   return (
     <Paper sx={{ p: 2 }}>
@@ -231,7 +235,7 @@ export default function StudentProfile() {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {a.academicProfile.seminars.map(s => (
+                  {seminars.map(s => (
                     <TableRow key={s.id}>
                       <TableCell>{s.name}</TableCell>
                       <TableCell>{attendancePercentage(s)}%</TableCell>
@@ -247,8 +251,8 @@ export default function StudentProfile() {
           {tab === 3 && (
             <Box>
               <Typography variant="h6">Tutorías recientes</Typography>
-              {a.academicProfile.tutorias && a.academicProfile.tutorias.length > 0 ? (
-                a.academicProfile.tutorias.map(t => (
+              {tutorias && tutorias.length > 0 ? (
+                tutorias.map(t => (
                   <Typography key={t.id} variant="body2">{new Date(t.date).toLocaleDateString()} — {t.note}</Typography>
                 ))
               ) : (
@@ -256,10 +260,10 @@ export default function StudentProfile() {
               )}
               <Box sx={{ mt: 2 }}>
                 <Typography variant="subtitle1">Trabajo Final / Tesis</Typography>
-                {a.academicProfile.tfi ? (
+                {tfi ? (
                   <div>
-                    <Typography>Estado: {a.academicProfile.tfi.status}</Typography>
-                    {a.academicProfile.tfi.title && <Typography>Título: {a.academicProfile.tfi.title}</Typography>}
+                    <Typography>Estado: {tfi.status}</Typography>
+                    {tfi.title && <Typography>Título: {tfi.title}</Typography>}
                   </div>
                 ) : <Typography>No hay información</Typography>}
               </Box>

@@ -1,15 +1,22 @@
 import React, { useState, useMemo } from 'react'
-import { getAspirantes, getCohorts } from '../components/DataProvider'
+import { getAspirantes, getCohorts, deleteAspirante } from '../components/DataProvider'
+import { useAuth } from '../components/AuthProvider'
+import ConfirmDialog from '../components/ConfirmDialog'
+import DeleteIcon from '@mui/icons-material/Delete'
 import { Paper, Typography, Table, TableHead, TableRow, TableCell, TableBody, TextField, IconButton, MenuItem, Select, InputLabel, FormControl, Box } from '@mui/material'
 import { Link } from 'react-router-dom'
 import VisibilityIcon from '@mui/icons-material/Visibility'
 
 export default function AdminStudents() {
+  const { user } = useAuth()
+  const canDelete = user && user.role === 'conduccion'
   const [q, setQ] = useState('')
   const aspirantes = getAspirantes()
   const cohorts = getCohorts()
   const [cohortFilter, setCohortFilter] = useState('')
   const [legajoFilter, setLegajoFilter] = useState('')
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [toDeleteId, setToDeleteId] = useState(null)
 
   const filtered = useMemo(() => {
     const s = (q || '').toLowerCase()
@@ -62,12 +69,19 @@ export default function AdminStudents() {
                 <TableCell>{a.legajoStatus}</TableCell>
                 <TableCell>
                   <IconButton component={Link} to={`/student/${a.id}`} aria-label={`Ver ${a.nombre}`}><VisibilityIcon /></IconButton>
+                  {canDelete && <IconButton aria-label={`Eliminar ${a.nombre}`} onClick={() => { setToDeleteId(a.id); setConfirmOpen(true) }}><DeleteIcon /></IconButton>}
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </Box>
+      <ConfirmDialog open={confirmOpen} title="Eliminar alumno" content="¿Confirma que desea eliminar este alumno? Esta acción no se puede deshacer." onClose={() => setConfirmOpen(false)} onConfirm={() => {
+        if (!toDeleteId) { setConfirmOpen(false); return }
+        deleteAspirante(toDeleteId)
+        setConfirmOpen(false)
+        window.location.reload()
+      }} />
     </Paper>
   )
 }
